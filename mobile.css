@@ -1,0 +1,46 @@
+body { margin: 0px; padding: 0px;}
+img { border: none; }
+h1 { padding: 0.2em 0.5em 0em 0.5em; text-align: center; font-variant: small-caps; display: none;}
+p.alert { color: red; text-align: center; text-decoration: blink; font-weight: bold;}
+.ison { background-color: green; }
+.isoff { color: white; background-color: black; }
+.isrebooting { background-color: orange; }
+.iserror { background-color: red; }
+.doing { color: red; background-color: blue; }
+.done { color: #FFFFFF; background-color: blue; }
+.failed { color: red; background-color: #000000; }
+.todos { background-color: orange; }
+.willdo { background-color: orange; }
+div #tout { margin: 0em; padding: 0em;}
+div #outlets { display: block; margin: 0.2em auto; width: auto; background-color: #FEE; padding: 0em; border: 0.1em outset #DDD;}
+div #outlets table { border: 0.1em inset #DDD; border-radius: 0.4em; padding: 0.2em; margin: 1em auto 0em auto; background-color: #FFF; border-spacing: 0px; width: auto;}
+div #outlets table tr { margin: 0em; padding: 1em 0em 1em 0em; border: none;}
+div #outlets table td { border-bottom: 1px solid #DDD; margin: 0px; padding: 0px;}
+div #outlets table tr td:first-child { border-right: 0.1em solid #DDD; }
+div #outlets table td span.status { display: block; text-align: center; }
+div #outlets table td select { text-align: center; width: 7em;}
+div #outlets table thead th { border: 0.1em inset #DDD; color: #EEE; background-color: #444; }
+
+div.dataTables_wrapper { margin: 0px; padding: 0px; }
+div.dataTables_filter { text-align: center; }
+div.dataTables_filter input { border-radius: 0.5em; }
+div#outlets form p.boulegue { text-align: center; }
+div#outlets form p.boulegue input { border-radius: 0.5em; background-color: #F33; font-variant: small-caps; font-weight: bold; color: #FFF; padding: 0.2em;}
+
+div#confirm { background-color: #EEE; border-radius: 2em; border: 0.2em outset #DDD; margin: 0.2em auto; width: auto; padding: 0.2em; }
+div#confirm>h3 { margin: 0em; text-decoration: underline;}
+div#confirm ul.todos { margin: 0em 0em 1em 0em; padding: 0em; }
+div#confirm form { display: inline;}
+div#confirm li { list-style-type: circle; margin: 0em 1em; border-radius: 1em; margin: 0em; padding: 0em;}
+div#confirm input { border-radius: 1em; }
+div#confirm input[value^=Annuler] { background-color: #3E3; }
+div#confirm input[value^=Exec] { background-color: #F33; color: #FFF;}
+
+div#result { background-color: #EEE; border-radius: 2em; border: 0.2em outset #DDD; margin: 0.2em auto; width: auto; padding: 0.2em; }
+div#result>h3 { margin: 0em; text-decoration: underline; }
+div#result p.alert { text-decoration: none; }
+p.joke { text-align: right; margin-right: 1em; }
+
+div#recent { background-color: #FEFEFE; border-radius: 2em; border: 0.2em outset #DDD; margin: 1em auto; width: auto; padding: 0.2em; }
+div#recent>h3 { margin: 0em; text-decoration: underline; font-size: smaller; }
+div#recent p { display: inline; font-variant: small-caps; font-size: smaller; }
