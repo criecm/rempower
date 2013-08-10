@@ -25,3 +25,7 @@ Copy config.sample.php to config.php and edit it to match your config
 # use
 Just go to the url of the scripts, your outlets should list themselves
 with the names you configured in the racks.
+
+# TODO
+* notifications by mail
+* implement a bit more security
