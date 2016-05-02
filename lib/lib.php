@@ -1,37 +1,58 @@
 <?php
 
 // update SNMP infos in session for a rack
-function getPDU($apcid,$port=0,$renew=false) {
+function getPDU($apcid,$renew=false) {
   // si c'est la premiere fois, on force la mise a jour
   if (!array_key_exists($apcid,$_SESSION)) {
     $_SESSION[$apcid]=array();
     $_SESSION[$apcid]["names"]=array();
     $_SESSION[$apcid]["control"]=array();
+    $_SESSION[$apcid]["timer"]=array();
     $renew=true;
   }
   // si ?renew=qqch, on force
   if (array_key_exists("renew",$_GET))
     $renew=true;
 
-  if (!array_key_exists(1,$_SESSION[$apcid]["names"])) {
+  // on met a jour si demande ou si c'est la premiere fois
+  if (($renew)||(!array_key_exists(1,$_SESSION[$apcid]["names"]))) {
     $resn=preg_replace('/^(STRING|INTEGER): "(.*)"$/','$2',snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportnamemib"]));
     foreach ($resn as $k => $v)
       $_SESSION[$apcid]["names"][$k+1]=$v;
   }
-  // si un seul port est demande, on le donne
-  if ($port>1) {
-    if ($renew)
-      $_SESSION[$apcid]["control"][$port]=trim(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportcontrolmib"].".".$port),"INTEGER: ");
-    return $_SESSION[$apcid]["control"][$port];
-  } 
-  // on met a jour si demande ou si c'est la premiere fois
+  // status
   if (($renew)||(!array_key_exists(1,$_SESSION[$apcid]["control"]))) {
     $resc=preg_replace('/^(STRING|INTEGER): /','',snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportcontrolmib"]));
     if ($resc)
       foreach ($resc as $k => $v)
         $_SESSION[$apcid]["control"][$k+1]=$v;
   }
+  // timers
+  if (($renew)||(!array_key_exists(1,$_SESSION[$apcid]["timer"]))) {
+    $resc=preg_replace('/^(STRING|INTEGER): /','',snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcporttimermib"]));
+    if ($resc)
+      foreach ($resc as $k => $v)
+        $_SESSION[$apcid]["timer"][$k+1]=$v;
+  }
   return $_SESSION[$apcid];
+}
+
+function getPDUPort($apcid,$port,$renew=false) {
+  if (!array_key_exists($apcid,$_SESSION)) {
+    getPDU($apcid);
+  }
+  if ($renew) {
+    $_SESSION[$apcid]["control"][$port]=trim(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportcontrolmib"].".".$port),'INTEGER: ');
+    $_SESSION[$apcid]["timer"][$port]=trim(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcporttimermib"].".".$port),'INTEGER: ');
+    $n=trim(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportnamemib"].".".$port),'STRING: ');
+    $_SESSION[$apcid]["names"][$port]=preg_replace('/"/','',$n);
+  }
+  if (!array_key_exists(1,$_SESSION[$apcid]["names"])) {
+    // TODO: error !!!
+    die("AIIIE");
+    return false;
+  }
+  return array($_SESSION[$apcid]["control"][$port],$_SESSION[$apcid]["timer"][$port],$_SESSION[$apcid]["names"][$port]);
 }
 
 function logAction($str) {
@@ -60,6 +81,25 @@ function manageAPCPort($apcid, $apcport, $action) {
   return $VERIFY;
 }
 
+function setAPCPortName($apcid, $apcport, $name) {
+  $ip = $GLOBALS["apcids"][$apcid];
+  $mib = $GLOBALS["apcportnamemib"].".".$apcport;
+  $VERIFY = snmpset($ip, $GLOBALS["apcsnmp"], $mib, "s", $name);
+  if ($VERIFY) {
+    $_SESSION[$apcid]["names"][$apcport]=$name;
+  }
+  return $VERIFY;
+}
+function setAPCPortTimer($apcid, $apcport, $timer) {
+  $ip = $GLOBALS["apcids"][$apcid];
+  $mib = $GLOBALS["apcporttimermib"].".".$apcport;
+  $VERIFY = snmpset($ip, $GLOBALS["apcsnmp"], $mib, "i", $timer);
+  if ($VERIFY) {
+    $_SESSION[$apcid]["timer"][$apcport]=$timer;
+  }
+  return $VERIFY;
+}
+
 // display port's status
 function getPortStatus($apcid,$port,$now=false) {
 //  if (array_key_exists($apcid.$port,$_SESSION["renew"])) {
@@ -68,7 +108,8 @@ function getPortStatus($apcid,$port,$now=false) {
 //    else
 //      unset($_SESSION["renew"][$apcid.$port]);
 //  }
-  $status=(int)getPDU($apcid,$port,$now);
+  $portstatus=getPDUPort($apcid,$port,$now);
+  $status=(int)$portstatus[0];
   switch ($status) {
     case 1:
       return "<span class=\"status ison\">On</span>";
@@ -82,9 +123,10 @@ function getPortStatus($apcid,$port,$now=false) {
 }
 
 // display HTML SELECT for a port
-function selectforPort($apcid,$port) {
-  echo "<select name=\"".$apcid."_".$port."\">";
-  $status=(int)getPDU($apcid,$port);
+function selectforPort($apcid,$port,$now=false) {
+  echo "<select name=\"".$apcid."_".$port."_action\">";
+  $portstatus=getPDUPort($apcid,$port,$now);
+  $status=(int)$portstatus[0];
   for ($o=1;$o<8;$o++) {
     if ($o==$status) { 
       echo "<option value=\"".$o."\" disabled=\"disabled\" selected=\"selected\">Action</option>";
@@ -98,3 +140,28 @@ function selectforPort($apcid,$port) {
   echo "</select>";
 }
 
+// same for port timer
+function selectPortTimer($apcid,$port,$now=false) {
+  echo "<select name=\"".$apcid."_".$port."_timer\">";
+  $portstatus=getPDUPort($apcid,$port,$now);
+  // valeurs possibles des timers
+  $tms=array(5,60,120,240,300,480);
+  // decalees (+n° prise + n° port)
+  foreach ($tms as $tm) {
+    $timers[]=$tm+$apcid+$port;
+  }
+  $timer=(int)$portstatus[1];
+  // on ajoute l'option pour ne rien changer
+  if (!in_array($timer,$timers)) {
+    echo "<option value=\"".$timer."\" disabled=\"disabled\" selected=\"selected\">".$timer."s</option>";
+  }
+  foreach ($timers as $secs) {
+    $secs=(int)$secs+(int)$apcid*2;
+    if ($secs==$timer) {
+      echo "<option value=\"".$secs."\" disabled=\"disabled\" selected=\"selected\">".$secs."s</option>";
+    } else {
+      echo "<option value=\"".$secs."\">".$secs."s</option>";
+    }
+  }
+  echo "</select>";
+}

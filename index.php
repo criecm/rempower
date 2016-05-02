@@ -35,15 +35,15 @@ if (($GLOBALS["refreshpage"]) && count($_SESSION["renew"])) { ?>
 $(document).ready(function() 
     { 
         $('#OutletsTable').dataTable( {
-		"bPaginate": false,
-		"bAutoWidth":false,
-		"oLanguage": { "sSearch": "Chercher:" }
-	 }
-	); 
+        	"bPaginate": false,
+        	"bAutoWidth":false,
+        	"oLanguage": { "sSearch": "Chercher:" }
+         }
+        ); 
     } 
 );
 function refreshpage() {
-	window.location=window.location;
+        window.location=window.location;
 }
   </script>
 </head>
@@ -81,7 +81,7 @@ if (array_key_exists("cancel",$_POST) && array_key_exists("TODO",$_SESSION) && (
     echo "<h3>Sur ".$prise.":</h3>\n<ul class=\"doing\">";
     foreach ($todo as $port => $action) {
       if (manageAPCPort($prise,$port,$action)) {
-	logAction($GLOBALS["states"][$action]." sur la prise ".$prise." port ".$port." (".$_SESSION[$prise]["names"][$port].")");
+        logAction($GLOBALS["states"][$action]." sur la prise ".$prise." port ".$port." (".$_SESSION[$prise]["names"][$port].")");
         echo "<li class=\"done\">OK Port $port (".$_SESSION[$prise]["names"][$port].") ".getPortStatus($prise,$port,true)."\n</li>";
         // if reboot ou delayed action, note this port to be re-checked later
         if (($action >= 3) && ($action < 7))
@@ -101,32 +101,86 @@ if (array_key_exists("cancel",$_POST) && array_key_exists("TODO",$_SESSION) && (
 elseif (array_key_exists("go",$_POST) && ($_POST["go"] == "KEY1")) {
   $_SESSION["TODO"]=array();
   unset($_POST["go"]);
+  $TODOS=array('name'=>array(),'timer'=>array(),'action'=>array());
   foreach ($_POST as $k => $v) {
     $keys = preg_split('/_/',$k);
-    if (array_key_exists($keys[0],$_SESSION) && (getPDU($keys[0],$keys[1],true) != $v) && array_key_exists($v,$GLOBALS["states"])) {
-      if (!array_key_exists($keys[0],$_SESSION["TODO"]))
-        $_SESSION["TODO"][$keys[0]]=array();
-      $_SESSION["TODO"][$keys[0]][$keys[1]]=$v;
+// print "<pre>KEYS count: ".count($keys)."</pre>\n";
+    if (count($keys) == 3) {
+      $portnow=getPDUPort($keys[0],$keys[1],true);
+#echo "<pre>";
+#print_r($keys);
+#print_r($portnow);
+#echo "</pre>\n";
+      switch ($keys[2]) {
+        case "action":	
+          if (array_key_exists($keys[0],$_SESSION) && ($portnow[0] != $v) && array_key_exists($v,$GLOBALS["states"])) {
+            $TODOS['action'][]=array($keys[0],$keys[1],$v);
+          }
+        break;
+        case "timer":
+          if (array_key_exists($keys[0],$_SESSION) && ($portnow[1] != $v)) {
+            $TODOS['timer'][]=array($keys[0],$keys[1],$v);
+          }
+        break;
+        case "name":
+          if (array_key_exists($keys[0],$_SESSION) && ($portnow[2] != $v)) {
+            $TODOS['name'][]=array($keys[0],$keys[1],$v);
+          }
+        break;
+      }
     }
   }
+
+  if (count($TODOS['action']) > 0) {
+    $_SESSION["TODO"]=array();
+    foreach ($TODOS['action'] as $k => $todo) {
+      if (!array_key_exists($todo[0],$_SESSION["TODO"]))
+	$_SESSION["TODO"][$todo[0]]=array();
+
+      $_SESSION["TODO"][$todo[0]][$todo[1]]=$todo[2];
+    }
+  }
+
   if (count($_SESSION["TODO"]) > 0) {
     echo "<div id=\"confirm\">\n";
-    foreach ($_SESSION["TODO"] as $prise => $todos) {
-      echo "<h3>Sur ".$prise.":</h3>\n<ul class=\"todos\">";
-      foreach ($todos as $port => $action) {
-        if (($action >= 3) && ($action < 7))
+    echo "<ul class=\"todos\">\n";
+    foreach ($_SESSION["TODO"] as $prise => $todo) {
+      foreach ($todo as $port => $action) {
+        echo "  <li>".$prise."/ port ".$port." (".$_SESSION[$prise]["names"][$port].") ".getPortStatus($prise,$port)." => <span class=\"willdo\">".$GLOBALS["states"][$action]."</span></li>\n";
+        if (($action >= 3) && ($action < 7)) {
           $_SESSION["WILLNEEDTOREFRESH"]=true;
-        echo "  <li>Port $port (".$_SESSION[$prise]["names"][$port].") ".getPortStatus($prise,$port)." => <span class=\"willdo\">".$GLOBALS["states"][$action]."</span></li>\n";
+	}
       }
-      echo "</ul>\n";
     }
+    echo "</ul>\n";
 ?>
 <form method="post"><input type="hidden" name="gogo" value="KEY2" /><input type="submit" class="tfou" value="Executer ces actions maintenant" /></form>
 <form method="post"><input type="hidden" name="cancel" value="KEY2" /><input type="submit" class="cancel" value="Annuler, c'était pour rire !" /></form>
 </div>
 <?php
-  } else { 
-    echo "<div id=\"result\"><p class=\"nothing\">Nothing to do</p></div>\n";
+  } else {
+    echo "<div id=\"results\">\n  <ul class=\"done\">\n";
+    foreach ($TODOS['name'] as $k => $todo) {
+      $portstatus=getPDUPort($todo[0],$todo[1]);
+      echo "    <li class=\"done\">".$todo[0]."/".$todo[1].": \"".$portstatus[2]."\" => \"".$todo[2]."\" ...";
+      if (setAPCPortName($todo[0],$todo[1],$todo[2])) {
+	echo "done :)";
+      } else {
+	echo "<span class=\"iserror\">Non ?!?</span>";
+      }
+      echo "</li>\n";
+    }
+    foreach ($TODOS['timer'] as $k => $todo) {
+      $portstatus=getPDUPort($todo[0],$todo[1]);
+      echo "    <li class=\"done\">".$todo[0]."/".$todo[1].": \"".$portstatus[1]."\" => \"".$todo[2]."\" ...";
+      if (setAPCPortTimer($todo[0],$todo[1],$todo[2])) {
+	echo "done :)";
+      } else {
+	echo "<span class=\"iserror\">Non ?!?</span>";
+      }
+      echo "</li>\n";
+    }
+    echo "</div>\n";
     unset($_SESSION["TODO"]);
   }
 }
@@ -136,7 +190,7 @@ if (!array_key_exists("TODO",$_SESSION)) {
   <form method="post" name="Outlets">
   <table id="OutletsTable">
     <thead>
-    <tr><th>Machine</th><th>P/O</th><th>Now</th><th>Action</th></tr>
+    <tr><th>Machine</th><th>P/O</th><th>Now</th><th>Action</th><th>Timer</th></tr>
     </thead>
     <tbody>
 <?php
@@ -145,11 +199,16 @@ if (!array_key_exists("TODO",$_SESSION)) {
     $noprise=preg_replace('/^prise/','',$prise);
 //print_r($_SESSION);
     for ($i=1; $i < 25; $i++) {
-      echo "    <tr><td>".$_SESSION[$prise]["names"][$i]."</td><td>".$noprise."/".$i."</td>\n";
+      echo "    <tr>\n<td>".$_SESSION[$prise]["names"][$i]."</td><td>".$noprise."/".$i."</td>\n";
+      //echo "    <tr>\n<td><input type=\"text\" value=\"".$_SESSION[$prise]["names"][$i]."\" name=\"".$prise."_".$i."_name\"></td><td>".$noprise."/".$i."</td>\n";
       echo "      <td>".getPortStatus($prise,$i)."</td>\n";
       echo "      <td>";
       selectforPort($prise,$i);
-      echo "\n      </td>\n    </tr>\n";
+      echo "\n      </td>\n";
+      echo "      <td>";
+      selectPortTimer($prise,$i);
+      echo "      </td>\n";
+      echo "    </tr>\n";
     }
   } ?>
     </tbody>
@@ -159,6 +218,7 @@ if (!array_key_exists("TODO",$_SESSION)) {
 <?php } 
 if ($GLOBALS['debug']) { ?>
 <div id="debug">
+<pre>TODOS: <?php print_r($TODOS); ?></pre>
 <pre>REFRESH: <?php print $GLOBALS["refreshpage"]?"OUI":"NON"; ?></pre>
 <pre><?php print_r($_SESSION); ?></pre>
 <pre><?php print_r($_POST); ?></pre>
