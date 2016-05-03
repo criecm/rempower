@@ -1,5 +1,14 @@
 <?php
 
+// traitement de valeur SNMP
+function stripSNMPvalue($str) {
+  $motifs=array('/^(INTEGER|STRING): /','/^"/','/"$/');
+  if (preg_match('/INTEGER/',$str)) {
+    $motifs[]='/[^0-9]/';
+  }
+  return preg_replace($motifs,'',$str);
+}
+
 // update SNMP infos in session for a rack
 function getPDU($apcid,$renew=false) {
   // si c'est la premiere fois, on force la mise a jour
@@ -16,23 +25,23 @@ function getPDU($apcid,$renew=false) {
 
   // on met a jour si demande ou si c'est la premiere fois
   if (($renew)||(!array_key_exists(1,$_SESSION[$apcid]["names"]))) {
-    $resn=preg_replace('/^(STRING|INTEGER): "(.*)"$/','$2',snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportnamemib"]));
+    $resn=snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportnamemib"]);
     foreach ($resn as $k => $v)
-      $_SESSION[$apcid]["names"][$k+1]=$v;
+      $_SESSION[$apcid]["names"][$k+1]=stripSNMPvalue($v);
   }
   // status
   if (($renew)||(!array_key_exists(1,$_SESSION[$apcid]["control"]))) {
-    $resc=preg_replace('/^(STRING|INTEGER): /','',snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportcontrolmib"]));
+    $resc=snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportcontrolmib"]);
     if ($resc)
       foreach ($resc as $k => $v)
-        $_SESSION[$apcid]["control"][$k+1]=$v;
+        $_SESSION[$apcid]["control"][$k+1]=stripSNMPvalue($v);
   }
   // timers
   if (($renew)||(!array_key_exists(1,$_SESSION[$apcid]["timer"]))) {
-    $resc=preg_replace('/^(STRING|INTEGER): /','',snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcporttimermib"]));
+    $resc=snmp2_walk($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcporttimermib"]);
     if ($resc)
       foreach ($resc as $k => $v)
-        $_SESSION[$apcid]["timer"][$k+1]=$v;
+        $_SESSION[$apcid]["timer"][$k+1]=stripSNMPvalue($v);
   }
   return $_SESSION[$apcid];
 }
@@ -42,10 +51,9 @@ function getPDUPort($apcid,$port,$renew=false) {
     getPDU($apcid);
   }
   if ($renew) {
-    $_SESSION[$apcid]["control"][$port]=trim(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportcontrolmib"].".".$port),'INTEGER: ');
-    $_SESSION[$apcid]["timer"][$port]=trim(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcporttimermib"].".".$port),'INTEGER: ');
-    $n=trim(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportnamemib"].".".$port),'STRING: ');
-    $_SESSION[$apcid]["names"][$port]=preg_replace('/"/','',$n);
+    $_SESSION[$apcid]["control"][$port]=stripSNMPvalue(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportcontrolmib"].".".$port));
+    $_SESSION[$apcid]["timer"][$port]=stripSNMPvalue(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcporttimermib"].".".$port));
+    $_SESSION[$apcid]["names"][$port]=stripSNMPvalue(snmpget($GLOBALS["apcids"][$apcid],$GLOBALS["apcsnmp"],$GLOBALS["apcportnamemib"].".".$port));
   }
   if (!array_key_exists(1,$_SESSION[$apcid]["names"])) {
     // TODO: error !!!

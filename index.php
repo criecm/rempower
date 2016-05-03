@@ -40,6 +40,11 @@ $(document).ready(function()
         	"oLanguage": { "sSearch": "Chercher:" }
          }
         ); 
+	$("td.name").dblclick(function(e) {
+		$(this).children("span.val").hide();
+		$(this).children("span.form").show();
+//		$(this).parent().children("span.form").style.display="inline";
+	});
     } 
 );
 function refreshpage() {
@@ -199,8 +204,12 @@ if (!array_key_exists("TODO",$_SESSION)) {
     $noprise=preg_replace('/^prise/','',$prise);
 //print_r($_SESSION);
     for ($i=1; $i < 25; $i++) {
-      echo "    <tr>\n<td>".$_SESSION[$prise]["names"][$i]."</td><td>".$noprise."/".$i."</td>\n";
-      //echo "    <tr>\n<td><input type=\"text\" value=\"".$_SESSION[$prise]["names"][$i]."\" name=\"".$prise."_".$i."_name\"></td><td>".$noprise."/".$i."</td>\n";
+      //echo "    <tr>\n<td>".$_SESSION[$prise]["names"][$i]."</td><td>".$noprise."/".$i."</td>\n";
+      $pname=$_SESSION[$prise]["names"][$i];
+      if ($pname == "") {
+              $pname="ZZZvide";
+      }
+      echo "    <tr>\n<td class=\"name\"><span class=\"index\" style=\"display: none\">$pname</span><span class=\"val\">".$_SESSION[$prise]["names"][$i]."</span><span class=\"form\" style=\"display: none\"><input type=\"text\" value=\"".$_SESSION[$prise]["names"][$i]."\" name=\"".$prise."_".$i."_name\"></span></td><td>".$noprise."/".$i."</td>\n";
       echo "      <td>".getPortStatus($prise,$i)."</td>\n";
       echo "      <td>";
       selectforPort($prise,$i);
@@ -218,7 +227,9 @@ if (!array_key_exists("TODO",$_SESSION)) {
 <?php } 
 if ($GLOBALS['debug']) { ?>
 <div id="debug">
+<?php if (defined($TODOS)) { ?>
 <pre>TODOS: <?php print_r($TODOS); ?></pre>
+<?php } ?>
 <pre>REFRESH: <?php print $GLOBALS["refreshpage"]?"OUI":"NON"; ?></pre>
 <pre><?php print_r($_SESSION); ?></pre>
 <pre><?php print_r($_POST); ?></pre>

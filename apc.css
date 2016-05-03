@@ -11,14 +11,14 @@ p.alert { color: red; text-align: center; text-decoration: blink; font-weight: b
 .failed { color: red; background-color: #000000; }
 .todos { background-color: orange; }
 .willdo { background-color: orange; }
-div #tout { margin: 1em; padding: 0em; }
-div #outlets { display: block; margin: 1em auto; width: 30em; background-color: #EEE; padding: 0em; border: 0.2em outset #DDD; border-radius: 1em; }
-div #outlets table { border: 0.1em inset #DDD; border-radius: 0.4em; padding: 0.2em; margin: 1em auto 0em auto; background-color: #FFF; border-spacing: 0px;}
-div #outlets table tr { margin: 0em; padding: 0em; border: none;}
-div #outlets table td { border-bottom: 1px solid #DDD; margin: 0px; padding: 0px;}
-div #outlets table tr td:first-child { border-right: 0.1em solid #DDD; }
-div #outlets table td span.status { display: block; text-align: center; }
-div #outlets table thead th { border: 0.1em inset #DDD; color: #EEE; background-color: #444; }
+div#tout { margin: 1em; padding: 0em; }
+div#outlets { display: block; margin: 1em auto; width: 30em; background-color: #EEE; padding: 0em; border: 0.2em outset #DDD; border-radius: 1em; }
+div#outlets table { border: 0.1em inset #DDD; border-radius: 0.4em; padding: 0.2em; margin: 1em auto 0em auto; background-color: #FFF; border-spacing: 0px;}
+div#outlets table tr { margin: 0em; padding: 0em; border: none;}
+div#outlets table td { border-bottom: 1px solid #DDD; margin: 0px; padding: 0px;}
+div#outlets table tr td:first-child { border-right: 0.1em solid #DDD; }
+div#outlets table td span.status { display: block; text-align: center; }
+div#outlets table thead th { border: 0.1em inset #DDD; color: #EEE; background-color: #444; }
 div.dataTables_filter { text-align: center; }
 div.dataTables_filter input { border-radius: 0.5em; }
 div.dataTables_wrapper { margin: 0px; padding: 0px; }
@@ -34,7 +34,7 @@ div#confirm input { border-radius: 1em; }
 div#confirm input[value^=Annuler] { background-color: #3E3; }
 div#confirm input[value^=Exec] { background-color: #F33; color: #FFF;}
 
-div#result { background-color: #EEE; border-radius: 2em; border: 0.2em outset #DDD; margin: 1em auto; width: 40em; padding: 1em; }
+div#result { background-color: #EEE; border-radius: 2em; border: 0.2em outset #DDD; margin: 1em auto; width: 30%; float: right;padding: 1em; }
 div#result>h3 { margin: 0em; text-decoration: underline; }
 div#result p.alert { text-decoration: none; }
 p.joke { text-align: right; margin-right: 1em; }
