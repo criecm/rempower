@@ -6,10 +6,12 @@ web interface to control power rack
 This is a simple php script written quickly to match a simple problem: 
 * be able to control more than one power outlet at a time
 * select outlets by name, without knowing on which power rack they are plugged
+* configure outlets names in one clic (you have to know the rack/port numbers for this :)
+* configure timers (fixed delays corrected by rack to spread the load in case of power surge)
 
 It doesn't:
-* configure proper names in the racks for you (we do that when plugging cables)
 * prepare coffee while you try to debug
+* authorize not authenticate anything
 
 # WARNING
 * NO SECURITY lies here: access control is on the server (**dont** make that 
