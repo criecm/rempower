@@ -24,6 +24,9 @@ Copy config.sample.php to config.php and edit it to match your config
 * **$GLOBALS["apcids"]** should list your rack(s) names and IP's
 * **$GLOBALS["apcsnmp"]** should match your SNMP write community
 
+# test
+`./scripts/liste_apc` will list configured power plugs
+
 # use
 Just go to the url of the scripts, your outlets should list themselves
 with the names you configured in the racks.
