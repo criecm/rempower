@@ -156,7 +156,7 @@ function selectPortTimer($apcid,$port,$now=false) {
   $tms=array(5,60,120,240,300,480);
   // decalees (+n° prise + n° port)
   foreach ($tms as $tm) {
-    $timers[]=$tm+$apcid+$port;
+    $timers[]=strval($tm).strval($apcid).strval($port);
   }
   $timer=(int)$portstatus[1];
   // on ajoute l'option pour ne rien changer
