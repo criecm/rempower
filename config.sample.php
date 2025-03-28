@@ -4,8 +4,14 @@ $GLOBALS["apcsnmp"] = "snmpwritestring";
 
 // translates APC IDs into their IP addresses
 $GLOBALS["apcids"] = array(
-  "APC1" => "xxx.xxx.xxx.xxx",
-  "APC2" => "xxx.xxx.xxx.xxx",
+	"APC1" => array(
+		"ip" => "xxx.xxx.xxx.xxx",
+		"type" => "apc"
+	),
+	"APC2" => array(
+		"ip" => "xxx.xxx.xxx.xxx",
+		"type" => "epdu"
+	)
 );
 
 $GLOBALS["states"] = array(
