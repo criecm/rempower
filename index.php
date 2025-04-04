@@ -199,7 +199,10 @@ if (!array_key_exists("TODO",$_SESSION)) {
     </thead>
     <tbody>
 <?php
-  foreach ($GLOBALS["apcids"] as $prise => $ip) {
+  foreach ($GLOBALS["apcids"] as $prise => $desc) {
+    if ($desc["type"] != "apc") {
+      continue;
+    }
     getPDU($prise);
     $noprise=preg_replace('/^prise/','',$prise);
 //print_r($_SESSION);
