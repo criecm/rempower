@@ -24,10 +24,11 @@ $GLOBALS["states"] = array(
   7 => "cancelPendingCommand");
 
 // This APC MIB is incomplete - must add the port number of the PDU at the end
-$GLOBALS["apcportcontrolmib"] = ".1.3.6.1.4.1.318.1.1.12.3.3.1.1.4";
-$GLOBALS["apcportnamemib"] = ".1.3.6.1.4.1.318.1.1.4.5.2.1.3";
-$GLOBALS["apcporttimermib"] = ".1.3.6.1.4.1.318.1.1.12.3.4.1.1.4";
-
+$GLOBALS["apc"] = array(
+	"portcontrolmib" => ".1.3.6.1.4.1.318.1.1.12.3.3.1.1.4",
+	"portnamemib" => ".1.3.6.1.4.1.318.1.1.4.5.2.1.3",
+	"porttimermib" => ".1.3.6.1.4.1.318.1.1.12.3.4.1.1.4",
+);
 // After reboot or delayed action, for how much seconds we must force getting 
 //  the port status via SNMP (aka not use cached status)
 $GLOBALS["renewsecs"] = 30;
