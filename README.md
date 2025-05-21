@@ -21,7 +21,7 @@ thing available from the whole internet)
 # install
 Copy config.sample.php to config.php and edit it to match your config
 
-* **$GLOBALS["apcids"]** should list your rack(s) names and IP's
+* **$GLOBALS["apcids"]** should list your rack(s) names, IP and type
 * **$GLOBALS["apcsnmp"]** should match your SNMP write community
 
 # test
@@ -32,5 +32,6 @@ Just go to the url of the scripts, your outlets should list themselves
 with the names you configured in the racks.
 
 # TODO
-* notifications by mail
+* better notifications by mail
+* use a templating system (twig)
 * implement a bit more security

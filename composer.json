@@ -1,0 +1,22 @@
+{
+    "name": "dsiecm/rempower",
+    "description": "Control remote PDU racks",
+    "type": "project",
+    "homepage": "https://github.com/criecm/rempower",
+    "license": "Beerware",
+    "autoload": {
+        "psr-4": {
+            "Dsiecm\\Rempower\\": "classes"
+        }
+    },
+    "authors": [
+        {
+            "name": "Geoffroy Desvernay"
+        }
+    ],
+    "minimum-stability": "alpha",
+    "require": {
+        "twig/twig": "^3.20",
+        "monolog/monolog": "^3.9"
+    }
+}

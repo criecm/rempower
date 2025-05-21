@@ -14,21 +14,10 @@ $GLOBALS["apcids"] = array(
 	)
 );
 
-$GLOBALS["states"] = array(
-  1 => "immediateOn",
-  2 => "immediateOff",
-  3 => "immediateReboot",
-  4 => "delayedOn",
-  5 => "delayedOff",
-  6 => "delayedReboot",
-  7 => "cancelPendingCommand");
+$GLOBALS["mailto"] = "my@mail.address";
+// timer's bases to configure (+ pdu nr + port nr to avoid starting all at once)
+$GLOBALS["timers"] = array(5,60,120,240,300,480);
 
-// This APC MIB is incomplete - must add the port number of the PDU at the end
-$GLOBALS["apc"] = array(
-	"portcontrolmib" => ".1.3.6.1.4.1.318.1.1.12.3.3.1.1.4",
-	"portnamemib" => ".1.3.6.1.4.1.318.1.1.4.5.2.1.3",
-	"porttimermib" => ".1.3.6.1.4.1.318.1.1.12.3.4.1.1.4",
-);
 // After reboot or delayed action, for how much seconds we must force getting 
 //  the port status via SNMP (aka not use cached status)
 $GLOBALS["renewsecs"] = 30;
