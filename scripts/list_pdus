@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+include(__DIR__."".DIRECTORY_SEPARATOR."../config.php");
+require(__DIR__."".DIRECTORY_SEPARATOR."../vendor/autoload.php");
+
+session_start();
+print("Initializing...");
+$pdus = array();
+foreach ($apcids as $pdu => $descr) {
+	print(" $pdu(".$descr["type"].")");
+	$class="Dsiecm\\Rempower\\PDU\\".$descr["type"];
+	$pdus[$pdu] = new $class($pdu,$descr["ip"],$GLOBALS["apcsnmp"]);
+	print(".");
+	//var_dump($pdus[$pdu]->ports);
+}
+print("\n");
+//var_dump($pdus);
+
+foreach ($pdus as $nom => $pdu) {
+	print("PDU $nom: \n");
+	$ports = $pdu->getAllPorts();
+	foreach ($ports["names"] as $pid => $pname) {
+		print("\t$pid\t".$pdu->getStateName($pdu->getPortStatus($pid))."\t".$pdu->getPortDelay($pid)."\t$pname\n");
+	}
+}

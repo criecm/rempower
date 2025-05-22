@@ -25,7 +25,7 @@ Copy config.sample.php to config.php and edit it to match your config
 * **$GLOBALS["apcsnmp"]** should match your SNMP write community
 
 # test
-`./scripts/liste_apc` will list configured power plugs
+`./scripts/list_pdus` will list configured power plugs and their outlet's properties
 
 # use
 Just go to the url of the scripts, your outlets should list themselves
