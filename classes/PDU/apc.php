@@ -25,15 +25,19 @@ class apc extends Base {
 			$this->ports = $_SESSION[$pduid];
 		} else {
 			$this->ports = array("names" => array(), "states" => array(), "timers" => array());
-			$this->getAllPorts();
+			$this->_getAllPorts();
 		}
 	}
 
-	public function getAllPorts() {
+	private function _getAllPorts() {
                 $this->ports["names"] = $this->snmp->walk(apc::$portnamemib,TRUE);
                 $this->ports["states"] = $this->snmp->walk(apc::$portcontrolmib,TRUE);
                 $this->ports["timers"] = $this->snmp->walk(apc::$porttimermib,TRUE);
 		return $this->ports;
+	}
+
+	public function getPortsIds() {
+		return array_keys($this->ports["names"]);
 	}
 
 	public function getPortStatus($portnum,$now=false) {
@@ -50,6 +54,14 @@ class apc extends Base {
 		} else {
 			return false;
 		}
+	}
+
+	public function getPortName($portnum,$now=false) {
+		if (!array_key_exists($portnum,$this->ports["names"]) || ($now)) {
+			$name = $this->snmp->get(apc::$portnamemib.".".$portnum);
+			$this->ports["names"][$portnum] = $name;
+		}
+		return $this->ports["names"][$portnum];
 	}
 
 	public function setPortName($portnum,$name) {

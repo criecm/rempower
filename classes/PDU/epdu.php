@@ -27,11 +27,11 @@ class epdu extends Base {
 			$this->ports = $_SESSION[$pduid];
 		} else {
 			$this->ports = array("names" => array(), "states" => array(), "timers" => array());
-			$this->getAllPorts();
+			$this->_getAllPorts();
 		}
 	}
 
-	public function getAllPorts() {
+	private function _getAllPorts() {
 		$this->ports["names"] = $this->snmp->walk(epdu::$portnamemib,TRUE);
 		$states = $this->ports["states"] = $this->snmp->walk(epdu::$portstatusmib,TRUE);
 		foreach ($states as $portid => $state) {
@@ -41,6 +41,9 @@ class epdu extends Base {
 		return $this->ports;
 	}
 
+	public function getPortsIds() {
+		return array_keys($this->ports["names"]);
+	}
 	private function epduStateToWebapc($state) {
 		switch ($state) {
 			case 1: // on
@@ -89,7 +92,22 @@ class epdu extends Base {
 		}
 	}
 
+	public function getPortName($portnum,$now=false) {
+		if (!array_key_exists($portnum,$this->ports["names"]) || ($now)) {
+			$name = $this->snmp->get(epdu::$porttimermib.".".$portnum);
+			$this->ports["names"][$portnum] = $name;
+		}
+		if ($this->ports["names"][$portnum] == "NONE") {
+			return "";
+		} else {
+			return $this->ports["names"][$portnum];
+		}
+	}
+
 	public function setPortName($portnum,$name) {
+		if ($name == "") {
+			$name = "NONE";
+		}
 		if ($this->snmp->set(epdu::$portnamemib.".".$portnum,"s",$name) == TRUE) {
 			$this->ports["names"][$portnum] = $name;
 			return true;

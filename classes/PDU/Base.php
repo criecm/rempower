@@ -21,7 +21,7 @@ abstract class Base {
 		if (array_key_exists($state_id,$this->states)) {
 			return $this->states[$state_id];
 		} else {
-			return "UNKNOWN STATE $state_id";
+			return FALSE;
 		}
 	}
 	public function getAllowedStates() {
@@ -33,8 +33,8 @@ abstract class Base {
 		$this->community = "$community";
 	}
 
-	// returns $this->ports
-	abstract function getAllPorts();
+	// return array of ports ids
+	abstract function getPortsIds();
 
 	// returns port state (from $states)
 	abstract function getPortStatus($portnum,$refresh);
@@ -42,6 +42,8 @@ abstract class Base {
 	// returns port state
 	abstract function controlPort($portnum,$state);
 
+	// returns string
+	abstract function getPortName($portnum,$refresh);
 	// returns bool
 	abstract function setPortName($portnum,$name);
 

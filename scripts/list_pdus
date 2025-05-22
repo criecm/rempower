@@ -18,8 +18,8 @@ print("\n");
 
 foreach ($pdus as $nom => $pdu) {
 	print("PDU $nom: \n");
-	$ports = $pdu->getAllPorts();
-	foreach ($ports["names"] as $pid => $pname) {
-		print("\t$pid\t".$pdu->getStateName($pdu->getPortStatus($pid))."\t".$pdu->getPortDelay($pid)."\t$pname\n");
+	$ports = $pdu->getPortsIds();
+	foreach ($ports as $pid) {
+		print("\t$pid\t".$pdu->getStateName($pdu->getPortStatus($pid))."\t".$pdu->getPortDelay($pid)."\t".$pdu->getPortName($pid)."\n");
 	}
 }

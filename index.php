@@ -38,7 +38,6 @@ $pdus = array();
 foreach ($apcids as $pdu => $descr) {
 	$class="Dsiecm\\Rempower\\PDU\\".$descr["type"];
 	$pdus[$pdu] = new $class($pdu,$descr["ip"],$GLOBALS["apcsnmp"]);
-	//var_dump($pdus[$pdu]->ports);
 }
 //var_dump($pdus);
 //exit(0);
@@ -111,14 +110,14 @@ if (array_key_exists("cancel",$_POST) && array_key_exists("TODO",$_SESSION) && (
     echo "<h3>Sur ".$prise.":</h3>\n<ul class=\"doing\">";
     foreach ($todo as $port => $action) {
       if ($pdus[$prise]->controlPort($port,$action)) {
-        $str=$pdus[$prise]->getStateName($action)." sur la prise ".$prise." port ".$port." (".$pdus[$prise]->ports["names"][$port].")";
+        $str=$pdus[$prise]->getStateName($action)." sur la prise ".$prise." port ".$port." (".$pdus[$prise]->getPortName($port).")";
   	error_log($str,1,$GLOBALS["mailto"],"Subject: Action APC via metrologie");
-        echo "<li class=\"done\">OK Port $port (".$pdus[$prise]->ports["names"][$port].") ".$pdus[$prise]->getPortStatus($port,true)."\n</li>";
+        echo "<li class=\"done\">OK Port $port (".$pdus[$prise]->getPortName($port).") ".$pdus[$prise]->getPortStatus($port,true)."\n</li>";
         // if reboot ou delayed action, note this port to be re-checked later
         if (($action >= 3) && ($action < 7))
           $_SESSION["renew"][$prise."_".$port]=time();
       } else {
-        echo "<li class=\"failed\">FAILED Port $port (".$pdus[$prise]->ports["names"][$port].") ".$pdus[$prise]->getPortStatus($port,true)."\n</li>";
+        echo "<li class=\"failed\">FAILED Port $port (".$pdus[$prise]->getPortName($port).") ".$pdus[$prise]->getPortStatus($port,true)."\n</li>";
       }
     }
     echo "</ul>\n";
@@ -144,17 +143,17 @@ elseif (array_key_exists("go",$_POST) && ($_POST["go"] == "KEY1")) {
 #echo "</pre>\n";
       switch ($keys[2]) {
         case "action":	
-          if (array_key_exists($keys[0],$_SESSION) && ($portstatus != $v) && array_key_exists($v,$GLOBALS["states"])) {
+          if (array_key_exists($keys[0],$_SESSION) && ($portstatus != $v) && ($pdus[$keys[0]]->getStateName($v) != FALSE)) {
             $TODOS['action'][]=array($keys[0],$keys[1],$v);
           }
         break;
         case "timer":
-          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->ports["timers"][$keys[1]] != $v)) {
+          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->getPortDelay($keys[1],TRUE) != $v)) {
             $TODOS['timer'][]=array($keys[0],$keys[1],$v);
           }
         break;
         case "name":
-          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->ports["names"][$keys[1]] != $v)) {
+          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->getPortName($keys[1],TRUE) != $v)) {
             $TODOS['name'][]=array($keys[0],$keys[1],$v);
           }
         break;
@@ -177,7 +176,7 @@ elseif (array_key_exists("go",$_POST) && ($_POST["go"] == "KEY1")) {
     echo "<ul class=\"todos\">\n";
     foreach ($_SESSION["TODO"] as $prise => $todo) {
       foreach ($todo as $port => $action) {
-        echo "  <li>".$prise."/ port ".$port." (".$pdus[$prise]->ports["names"][$port].") ".$pdus[$prise]->getPortStatus($port)." => <span class=\"willdo\">".$GLOBALS["states"][$action]."</span></li>\n";
+        echo "  <li>".$prise."/ port ".$port." (".$pdus[$prise]->getPortName($port).") ".$pdus[$prise]->getPortStatus($port)." => <span class=\"willdo\">".$pdus[$prise]->getStateName($action)."</span></li>\n";
         if (($action >= 0) && ($action < 4)) {
           $_SESSION["WILLNEEDTOREFRESH"]=true;
 	}
@@ -192,7 +191,7 @@ elseif (array_key_exists("go",$_POST) && ($_POST["go"] == "KEY1")) {
   } else {
     echo "<div id=\"results\">\n  <ul class=\"done\">\n";
     foreach ($TODOS['name'] as $k => $todo) {
-      echo "    <li class=\"done\">".$todo[0]."/".$todo[1].": \"<span class=\"status\">".$pdus[$todo[0]]->ports["names"][$todo[1]]."</span>\" => \"".$todo[2]."\" ...";
+      echo "    <li class=\"done\">".$todo[0]."/".$todo[1].": \"<span class=\"status\">".$pdus[$todo[0]]->getPortName($todo[1])."</span>\" => \"".$todo[2]."\" ...";
       if ($pdus[$todo[0]]->setPortName($todo[1],$todo[2]) == TRUE) {
 	echo "done :)";
       } else {
@@ -202,7 +201,7 @@ elseif (array_key_exists("go",$_POST) && ($_POST["go"] == "KEY1")) {
     }
     foreach ($TODOS['timer'] as $k => $todo) {
       $portstate=$pdus[$todo[0]]->getPortStatus($todo[1]);
-      echo "    <li class=\"done\">".$todo[0]."/".$todo[1].": \"<span class=\"status\">".$pdus[$todo[0]]->ports["timers"][$todo[1]]."</span>\" => \"".$todo[2]."\" ...";
+      echo "    <li class=\"done\">".$todo[0]."/".$todo[1].": \"<span class=\"status\">".$pdus[$todo[0]]->getPortDelay($todo[1])."</span>\" => \"".$todo[2]."\" ...";
       if ($pdus[$todo[0]]->setPortDelay($todo[1],$todo[2]) == TRUE) {
 	echo "done :)";
       } else {
@@ -234,10 +233,8 @@ if (!array_key_exists("TODO",$_SESSION)) {
       $labelprise = $noprise;
     }
     echo "<!-- prise $prise (groupe $groupprise, label $labelprise -->\n";
-    echo "<!-- $prise ports: ".join(",",$pdus[$prise]->ports["names"])." -->\n";
-    echo "<!-- $prise states: ".join(",",$pdus[$prise]->ports["states"])." -->\n";
-    echo "<!-- $prise timers: ".join(",",$pdus[$prise]->ports["timers"])." -->\n";
-    foreach ($pdus[$prise]->ports["names"] as $portid => $portname) {
+    foreach ($pdus[$prise]->getPortsIds() as $portid) {
+      $portname = $pdus[$prise]->getPortName($portid);
       if ($portname == "") {
               $pname="ZZZvide";
       } else {
@@ -263,7 +260,7 @@ if (!array_key_exists("TODO",$_SESSION)) {
       echo "        </select>\n";
       echo "      </td>\n";
       // select for timer
-      $timer=$pdus[$prise]->ports["timers"][$portid];
+      $timer=$pdus[$prise]->getPortDelay($portid);
       echo "<!-- $prise / $portid timer = $timer -->\n";
       echo "      <td>\n";
       echo "        <select name=\"".$prise."_".$portid."_timer\">\n";
