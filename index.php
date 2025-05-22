@@ -148,12 +148,12 @@ elseif (array_key_exists("go",$_POST) && ($_POST["go"] == "KEY1")) {
           }
         break;
         case "timer":
-          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->getPortDelay($keys[1],TRUE) != $v)) {
+          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->getPortDelay($keys[1]) != $v)) {
             $TODOS['timer'][]=array($keys[0],$keys[1],$v);
           }
         break;
         case "name":
-          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->getPortName($keys[1],TRUE) != $v)) {
+          if (array_key_exists($keys[0],$_SESSION) && ($pdus[$keys[0]]->getPortName($keys[1]) != $v)) {
             $TODOS['name'][]=array($keys[0],$keys[1],$v);
           }
         break;
