@@ -62,6 +62,14 @@ class apc extends Base {
 		}
 	}
 
+	public function getPortDelay($portnum,$now=false) {
+		if (!array_key_exists($portnum,$this->ports["timers"]) || ($now)) {
+			$timer = $this->snmp->get(apc::$porttimermib.".".$portnum);
+			$this->ports["timers"][$portnum] = $timer;
+		}
+		return $this->ports["timers"][$portnum];
+	}
+
 	public function setPortDelay($portnum,$timer) {
 		if ($this->snmp->set(apc::$porttimermib.".".$portnum,"i",$timer) == TRUE) {
 			$this->ports["timers"][$portnum] = $timer;

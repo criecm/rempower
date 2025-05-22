@@ -3,7 +3,6 @@ namespace Dsiecm\Rempower\PDU;
 use \SNMP;
 abstract class Base {
 
-	private array $ports;
 	protected string $ip;
 	protected bool $renew;
 	protected string $name;
@@ -16,23 +15,7 @@ abstract class Base {
 	);
 	private static $SNMPVER;
 	protected $snmp;
-
-//	public function __construct($pduid,$ip,$renew=false) {
-//		$this->ip = $ip;
-//		$this->name = $pduid;
-//		$this->renew = true;
-//		$this->snmp = new SNMP($this::$SNMPVER,$this->ip,$this->community);
-//		$this->snmp->valueretrieval = SNMP_VALUE_PLAIN;
-//		if ( ! array_key_exists($pduid,$_SESSION) ) {
-//			$_SESSION[$pduid] = array();
-//		}
-//		if ( array_key_exists("names",$_SESSION[$pduid]) && ($renew === false) ) {
-//			$this->ports = $_SESSION[$pduid];
-//		} else {
-//			$this->ports = array("names" => array(), "states" => array(), "timers" => array());
-//			$this->getAllPorts();
-//		}
-//	}
+	public array $ports;
 
 	public function getStateName($state_id) {
 		if (array_key_exists($state_id,$this->states)) {
@@ -54,7 +37,7 @@ abstract class Base {
 	abstract function getAllPorts();
 
 	// returns port state (from $states)
-	abstract function getPortStatus($portnum);
+	abstract function getPortStatus($portnum,$refresh);
 
 	// returns port state
 	abstract function controlPort($portnum,$state);
@@ -62,6 +45,8 @@ abstract class Base {
 	// returns bool
 	abstract function setPortName($portnum,$name);
 
+	// retunr int(secs)
+	abstract function getPortDelay($portnum,$refresh);
 	// returns bool
 	abstract function setPortDelay($portnum,$timer);
 }

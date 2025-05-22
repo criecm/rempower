@@ -56,7 +56,7 @@ class epdu extends Base {
 				break;
 		}
 	}
-		
+
 	public function getPortStatus($portnum,$now=false) {
 		if (!array_key_exists($portnum,$this->ports["states"]) || ($now)) {
 			$status = $this->snmp->get(epdu::$portstatusmib.".".$portnum);
@@ -97,6 +97,14 @@ class epdu extends Base {
 			error_log($this->snmp->getError());
 			return false;
 		}
+	}
+
+	public function getPortDelay($portnum,$now=false) {
+		if (!array_key_exists($portnum,$this->ports["timers"]) || ($now)) {
+			$timer = $this->snmp->get(epdu::$porttimermib.".".$portnum);
+			$this->ports["timers"][$portnum] = $timer;
+		}
+		return $this->ports["timers"][$portnum];
 	}
 
 	public function setPortDelay($portnum,$timer) {
